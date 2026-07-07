@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GYM Management - Admin Dashboard</title>
+  <link rel="icon" href="assets/logo.png">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/admin.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-dumbbell"></i>
+      <h1>GYM Management</h1>
+    </div>
+    <nav>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#" class="nav-link active" data-section="membersSection"><i class="fas fa-users"></i> Members</a></li>
+        <li><a href="#" class="nav-link" data-section="billSection"><i class="fas fa-receipt"></i> Billing</a></li>
+        <li><a href="#" class="nav-link" data-section="notificationsSection"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="#" class="nav-link" data-section="supplementsSection"><i class="fas fa-pills"></i> Supplements</a></li>
+        <li><a href="#" class="nav-link" data-section="dietPlansSection"><i class="fas fa-utensils"></i> Diet Plans</a></li>
+        <li><button onclick="logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Members Management Section -->
+    <section id="membersSection">
+      <h2><i class="fas fa-users"></i> Members Management</h2>
+      <form id="addMemberForm">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="john@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" placeholder="(123) 456-7890" required>
+        </div>
+        <div class="form-group">
+          <label>Membership Package</label>
+          <select name="package" required>
+            <option value="" disabled selected>Select Package</option>
+            <option value="basic">Basic</option>
+            <option value="premium">Premium</option>
+            <option value="platinum">Platinum</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Join Date</label>
+          <input type="date" name="joinDate" required>
+        </div>
+        <button type="submit"><i class="fas fa-user-plus"></i> Add Member</button>
+      </form>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Package</th>
+              <th>Join Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="membersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Billing Section -->
+    <section id="billSection">
+      <h2><i class="fas fa-receipt"></i> Billing & Invoices</h2>
+      <form id="createBillForm">
+        <div class="form-group">
+          <label>Select Member</label>
+          <select id="billMemberSelect" required>
+            <option value="" disabled selected>Select Member</option>
+            <!-- Members will be loaded here dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Package / Plan</label>
+          <input type="text" id="billPackage" placeholder="Premium Plan" required>
+        </div>
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <input type="date" id="billDate" required>
+        </div>
+    
+        <h3 style="grid-column: 1 / -1; margin-top: 1rem;"><i class="fas fa-list-ol"></i> Add Bill Items</h3>
+        <div id="billItemsContainer">
+          <div class="billItem">
+            <input type="text" class="itemName" placeholder="Item Name" required>
+            <input type="number" class="itemQty" placeholder="Qty" required min="1">
+            <input type="number" class="itemPrice" placeholder="Price (₹)" required min="0" step="0.01">
+          </div>
+        </div>
+    
+        <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="button" onclick="addBillItem()" style="background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-glass);"><i class="fas fa-plus"></i> Add Item</button>
+          <button type="submit"><i class="fas fa-file-invoice"></i> Create Bill</button>
+        </div>
+      </form>
+    
+      <div id="generatedBill" style="display: none;">
+        <h3 style="margin-bottom: 1.25rem;"><i class="fas fa-file-alt"></i> Generated Invoice details</h3>
+        <p><strong>Member Name:</strong> <span id="displayMemberName"></span></p>
+        <p><strong>Package:</strong> <span id="displayPackage"></span></p>
+        <p><strong>Date:</strong> <span id="displayDate"></span></p>
+    
+        <div class="table-responsive" style="margin-top: 1.5rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="billItemsTable"></tbody>
+          </table>
+        </div>
+    
+        <h3 class="text-right" style="margin-top: 1.5rem; color: var(--primary);">Total Amount: ₹<span id="displayTotalAmount"></span></h3>
+      </div>
+    </section>
+
+    <!-- Notifications Section -->
+    <section id="notificationsSection">
+      <h2><i class="fas fa-bell"></i> Send Notifications</h2>
+      <form id="sendNotificationForm">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Notification Message</label>
+          <textarea id="notificationMessage" placeholder="Type notification details here..." name="message" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="recipientType">Send to:</label>
+          <select id="recipientType" name="recipientType">
+            <option value="all">All Members</option>
+            <option value="selected">Selected Members</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="memberSelectionGroup" style="display: none; grid-column: 1 / -1;">
+          <label>Select Recipient Members:</label>
+          <div id="membersCheckboxList" class="checkbox-list"></div>
+        </div>
+        
+        <button type="submit" id="sendNotificationBtn" style="grid-column: 1 / -1;"><i class="fas fa-paper-plane"></i> Send Notification</button>
+      </form>
+    
+      <h3><i class="fas fa-history"></i> Recent Notifications</h3>
+      <ul id="notificationsList"></ul>
+    </section>
+
+    <!-- Supplement Store Section -->
+    <section id="supplementsSection">
+      <h2><i class="fas fa-pills"></i> Supplement Store Inventory</h2>
+      <form id="addSupplementForm">
+        <div class="form-group">
+          <label>Supplement Name</label>
+          <input type="text" name="name" id="supplementName" placeholder="Whey Protein" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="description" id="supplementDescription" placeholder="Chocolate Flavour 1kg" required>
+        </div>
+        <div class="form-group">
+          <label>Unit Price ($)</label>
+          <input type="number" name="price" id="supplementPrice" placeholder="59.99" min="0" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Stock Quantity</label>
+          <input type="number" name="stock" id="supplementStock" placeholder="25" min="0" required>
+        </div>
+        <button type="submit"><i class="fas fa-plus"></i> Add Item</button>
+      </form>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="supplementsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Diet Plans Section -->
+    <section id="dietPlansSection">
+      <h2><i class="fas fa-utensils"></i> Diet Plans Management</h2>
+
+      <form id="addDietPlanForm">
+        <div class="form-group">
+          <label>Diet Plan Title</label>
+          <select id="name" required>
+            <option value="" disabled selected>Select a Diet Plan</option>
+            <option value="Weight Loss Starter">Weight Loss Starter</option>
+            <option value="Keto Kickstart">Keto Kickstart</option>
+            <option value="Muscle Builder">Muscle Builder</option>
+            <option value="High Protein Plan">High Protein Plan</option>
+            <option value="Low Carb Lean">Low Carb Lean</option>
+            <option value="Gluten-Free Fuel">Gluten-Free Fuel</option>
+            <option value="Vegan Vitality">Vegan Vitality</option>
+            <option value="Intermittent Fasting Guide">Intermittent Fasting Guide</option>
+            <option value="Balanced Lifestyle Plan">Balanced Lifestyle Plan</option>
+            <option value="Paleo Power">Paleo Power</option>
+            <option value="Diabetic-Friendly Diet">Diabetic-Friendly Diet</option>
+            <option value="Heart Healthy Plan">Heart Healthy Plan</option>
+            <option value="Quick Fat Burn">Quick Fat Burn</option>
+            <option value="Mass Gainer Plan">Mass Gainer Plan</option>
+            <option value="Detox Cleanse">Detox Cleanse</option>
+            <option value="Athlete’s Energy Plan">Athlete’s Energy Plan</option>
+            <option value="Beginner’s Fitness Fuel">Beginner’s Fitness Fuel</option>
+            <option>Low-Calorie Control</option>
+            <option>Mediterranean Magic</option>
+            <option>Post-Workout Recovery Plan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Daily Calorie Count</label>
+          <input type="number" id="calories" placeholder="2500" required min="0">
+        </div>
+        <div class="form-group">
+          <label>Plan Duration</label>
+          <input type="text" id="duration" placeholder="e.g. 4 weeks" required>
+        </div>
+        <div class="form-group">
+          <label>Difficulty Tier</label>
+          <select id="difficulty" required>
+            <option value="" disabled selected>Select Difficulty</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Plan Description & Instructions</label>
+          <textarea id="description" placeholder="Meal schedule details..." required></textarea>
+        </div>
+        <button type="submit" style="grid-column: 1 / -1;"><i class="fas fa-plus"></i> Add Plan</button>
+      </form>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Plan Name</th>
+              <th>Description</th>
+              <th>Calories</th>
+              <th>Duration</th>
+              <th>Difficulty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dietPlansTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <i class="fas fa-dumbbell"></i>
+          <span>GYM Management</span>
+        </div>
+        <p>Comprehensive gym administration — manage members, billing, diet plans, supplements and notifications all from one powerful dashboard.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Admin Modules</h4>
+        <ul>
+          <li><a href="#" onclick="showSection('membersSection')"><i class="fas fa-chevron-right"></i> Members</a></li>
+          <li><a href="#" onclick="showSection('billSection')"><i class="fas fa-chevron-right"></i> Billing</a></li>
+          <li><a href="#" onclick="showSection('notificationsSection')"><i class="fas fa-chevron-right"></i> Notifications</a></li>
+          <li><a href="#" onclick="showSection('supplementsSection')"><i class="fas fa-chevron-right"></i> Supplements</a></li>
+          <li><a href="#" onclick="showSection('dietPlansSection')"><i class="fas fa-chevron-right"></i> Diet Plans</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Portals</h4>
+        <ul>
+          <li><a href="index.html"><i class="fas fa-chevron-right"></i> Login Page</a></li>
+          <li><a href="member.html"><i class="fas fa-chevron-right"></i> Member Portal</a></li>
+          <li><a href="user.html"><i class="fas fa-chevron-right"></i> User Directory</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>123 Fitness Street, Health City, HC 12345</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-phone-alt"></i>
+          <span>+1 (123) 456-7890</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>admin@gymmanagement.com</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-clock"></i>
+          <span>Mon–Fri: 6 AM – 10 PM<br>Sat–Sun: 8 AM – 8 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; <span id="currentYear"></span> GYM Management System &mdash; Admin Dashboard. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYM Management System - Login</title>
+    <link rel="icon" href="assets/logo.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p>Processing, please wait...</p>
+        </div>
+    </div>
+
+    <header>
+        <div class="container">
+            <i class="fas fa-dumbbell"></i>
+            <h1>GYM Management System</h1>
+            <p>Digital solutions for modern fitness centers</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Login</div>
+                    <div class="auth-tab" id="registerTab"><i class="fas fa-user-plus"></i> Register</div>
+                </div>
+
+                <div class="auth-content">
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form active">
+                        <div class="form-group">
+                            <label for="loginEmail"><i class="far fa-envelope"></i> Email Address</label>
+                            <input type="email" id="loginEmail" class="form-control" required placeholder="name@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginRole"><i class="fas fa-user-shield"></i> Portal Role</label>
+                            <select id="loginRole" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="admin">Admin Dashboard</option>
+                                <option value="member">Member Portal</option>
+                                <option value="user">User Directory</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">Login <i class="fas fa-arrow-right"></i></button>
+                        <div id="loginError" class="error-message"></div>
+                    </form>
+
+                    <!-- Registration Form -->
+                    <form id="registerForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="registerName"><i class="far fa-user"></i> Full Name</label>
+                            <input type="text" id="registerName" class="form-control" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail"><i class="far fa-envelope"></i> Email Address</label>
+                            <input type="email" id="registerEmail" class="form-control" required placeholder="name@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword"><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" id="registerPassword" class="form-control" required minlength="6" placeholder="At least 6 characters">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerConfirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                            <input type="password" id="registerConfirmPassword" class="form-control" required placeholder="Repeat password">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerRole"><i class="fas fa-users-cog"></i> Account Role</label>
+                            <select id="registerRole" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="member">Member</option>
+                                <option value="user">Standard User</option>
+                            </select>
+                        </div>
+
+                        <div id="memberFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="registerPhone"><i class="fas fa-phone-alt"></i> Phone Number</label>
+                                <input type="tel" id="registerPhone" class="form-control" placeholder="(123) 456-7890">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPackage"><i class="fas fa-box"></i> Membership Package</label>
+                                <select id="registerPackage" class="form-control">
+                                    <option value="" disabled selected>Select Package</option>
+                                    <option value="basic">Basic Plan ($50/mo)</option>
+                                    <option value="premium">Premium Plan ($80/mo)</option>
+                                    <option value="platinum">Platinum Plan ($120/mo)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn">Register <i class="fas fa-user-check"></i></button>
+                        <div id="registerError" class="error-message"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-file-invoice-dollar" style="color: var(--primary);"></i></div>
+                <h3>Digital Receipts</h3>
+                <p>Access your complete billing history and digital receipts at any time from your device.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bell-ring" style="color: var(--secondary);"></i><i class="fas fa-bell" style="color: var(--secondary);"></i></div>
+                <h3>Real-time Notifications</h3>
+                <p>Receive instant announcements, training modifications, and personal messages from gym staff.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-mobile-alt" style="color: var(--primary);"></i></div>
+                <h3>Mobile Optimised</h3>
+                <p>Smooth, lightning-fast responsive interface designed to work on desktops, tablets, and phones.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <!-- Brand Column -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>GYM Management</span>
+                </div>
+                <p>Empowering fitness centres with smart digital tools — from member management and billing to personalised diet plans and real-time notifications.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-chevron-right"></i> Login / Register</a></li>
+                    <li><a href="admin.html"><i class="fas fa-chevron-right"></i> Admin Dashboard</a></li>
+                    <li><a href="member.html"><i class="fas fa-chevron-right"></i> Member Portal</a></li>
+                    <li><a href="user.html"><i class="fas fa-chevron-right"></i> User Directory</a></li>
+                </ul>
+            </div>
+
+            <!-- Services -->
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Membership Plans</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Diet &amp; Nutrition</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Supplement Store</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Personal Training</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Billing &amp; Invoices</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <div class="footer-contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>123 Fitness Street, Health City, HC 12345</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+1 (123) 456-7890</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>info@gymmanagement.com</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Mon–Fri: 6 AM – 10 PM<br>Sat–Sun: 8 AM – 8 PM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <span id="currentYear"></span> GYM Management System. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
+    </footer>
+    <script src="js/login.js"></script>
+</body>
+
+</html>

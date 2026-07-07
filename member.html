@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYM Management - Member Portal</title>
+    <link rel="icon" href="assets/logo.png">
+    <link rel="stylesheet" href="css/member.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/member.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-dumbbell"></i>
+            <h1>GYM Management</h1>
+        </div>
+        <nav>
+            <button onclick="logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </nav>
+    </header>
+
+    <div class="member-dashboard container">
+        <aside class="member-sidebar">
+            <div class="member-profile">
+                <i class="fas fa-user-circle" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 1rem; display: block; filter: drop-shadow(0 0 5px rgba(255,255,255,0.05));"></i>
+                <h2 id="memberName">John Doe</h2>
+                <p id="memberPackage">Premium Member</p>
+            </div>
+
+            <ul class="member-nav">
+                <li><a href="#" class="active" data-section="billReceipts" onclick="showSection('billReceipts')"><i><i class="fas fa-file-invoice-dollar"></i></i> My Bills</a></li>
+                <li><a href="#" data-section="billNotifications" onclick="showSection('billNotifications')"><i><i class="fas fa-bell"></i></i> Notifications</a></li>
+                <li><a href="#" data-section="profile-section" onclick="showSection('profile-section')"><i><i class="fas fa-user-cog"></i></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <main class="member-content">
+            <!-- Bill Receipts Section -->
+            <div class="content-section" id="billReceipts">
+                <h2><i class="fas fa-receipt"></i> Your Bill Receipts</h2>
+                <div class="search-filter">
+                    <input type="text" id="receiptSearch" placeholder="Search invoices...">
+                    <select id="receiptFilter">
+                        <option value="all">All Invoices</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="receipts-list" id="receiptsList">
+                    <!-- Receipts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Bill Notifications Section -->
+            <div class="content-section" id="billNotifications" style="display: none;">
+                <h2><i class="fas fa-bell"></i> Messages & Notifications</h2>
+                <div class="notifications-list" id="notificationsList">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <section id="profile-section" style="display: none;" class="content-section">
+                <h2 class="section-title"><i class="fas fa-user"></i> My Profile</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value" id="profileName">John Doe</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email Address</span>
+                        <span class="info-value" id="profileEmail">john@example.com</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone Number</span>
+                        <span class="info-value" id="profilePhone">+1 234 567 890</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Membership Package</span>
+                        <span class="info-value" id="profilePackage">Premium ($80/month)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Join Date</span>
+                        <span class="info-value" id="profileJoinDate">15 Jan 2023</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="showUpdateProfileForm()"><i class="fas fa-edit"></i> Edit Profile</button>
+
+                <form id="updateProfileForm" style="display: none; margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-user-edit"></i> Update Details</h3>
+                    <div class="form-group">
+                        <label for="updateName">Full Name</label>
+                        <input type="text" id="updateName" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="updatePhone">Phone Number</label>
+                        <input type="tel" id="updatePhone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="updatePackage">Membership Package</label>
+                        <select id="updatePackage" class="form-control">
+                            <option value="basic">Basic ($50/month)</option>
+                            <option value="premium">Premium ($80/month)</option>
+                            <option value="platinum">Platinum ($120/month)</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn" onclick="updateProfile()"><i class="fas fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn" onclick="cancelUpdateProfile()"><i class="fas fa-times"></i> Cancel</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>GYM Management</span>
+                </div>
+                <p>Your personal fitness hub — view your bills, receive notifications, track your membership and manage your profile all in one place.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>My Portal</h4>
+                <ul>
+                    <li><a href="#" onclick="showSection('billReceipts')"><i class="fas fa-chevron-right"></i> My Bills</a></li>
+                    <li><a href="#" onclick="showSection('billNotifications')"><i class="fas fa-chevron-right"></i> Notifications</a></li>
+                    <li><a href="#" onclick="showSection('profile-section')"><i class="fas fa-chevron-right"></i> My Profile</a></li>
+                    <li><a href="index.html"><i class="fas fa-chevron-right"></i> Logout</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Membership Plans</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Diet &amp; Nutrition</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Supplement Store</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Personal Training</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <div class="footer-contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>123 Fitness Street, Health City, HC 12345</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+1 (123) 456-7890</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>support@gymmanagement.com</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Mon–Fri: 6 AM – 10 PM<br>Sat–Sun: 8 AM – 8 PM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <span id="currentYear"></span> GYM Management System &mdash; Member Portal. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

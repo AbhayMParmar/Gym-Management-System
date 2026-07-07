@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYM Management - User Portal</title>
+    <link rel="icon" href="assets/logo.png">
+    <link rel="stylesheet" href="css/user.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/user.js"></script>
+</head>
+
+<body>
+    <header class="user-header container" style="margin-top: 1.5rem;">
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-dumbbell" style="font-size: 1.8rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px var(--primary-glow));"></i>
+            <h1 class="user-welcome" style="color: white; margin: 0;">Welcome, <span id="userName">User</span></h1>
+        </div>
+        <nav class="user-nav">
+            <button onclick="logout()" class="user-nav-btn logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </nav>
+    </header>
+
+    <div class="user-container">
+        <main class="user-content">
+            <!-- Gym Information Section -->
+            <section id="gym-info-section" class="user-card active-section">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i> Gym Information</h2>
+
+                <div class="gym-info-grid">
+                    <div>
+                        <h3><i class="fas fa-id-card"></i> Contact Details</h3>
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value" id="gymAddress">123 Fitness Street, Health City, HC 12345</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value" id="gymPhone">(123) 456-7890</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" id="gymEmail">info@gymmanagement.com</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3><i class="far fa-clock"></i> Operating Hours</h3>
+                        <div class="info-item">
+                            <span class="info-label">Monday - Friday</span>
+                            <span class="info-value" id="weekdayHours">6:00 AM - 10:00 PM</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Saturday</span>
+                            <span class="info-value" id="saturdayHours">8:00 AM - 8:00 PM</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Sunday</span>
+                            <span class="info-value" id="sundayHours">9:00 AM - 6:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3><i class="fas fa-running"></i> Facilities & Zones</h3>
+                        <div class="info-item">
+                            <span class="info-label">Cardio Area</span>
+                            <span class="info-value">Treadmills, Ellipticals, Stationary Bikes</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weight Training</span>
+                            <span class="info-value">Free Weights, Strength Machines, Functional Rig</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Studio Classes</span>
+                            <span class="info-value">Yoga, HIIT, Spin, Zumba</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 2rem;"><i class="fas fa-bullhorn"></i> Recent Announcements</h2>
+                <div id="announcementsList">
+                    <div class="info-item">
+                        <span class="info-label">July 15, 2023</span>
+                        <span class="info-value">New yoga classes starting next week! Sign up at the front desk.</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">July 10, 2023</span>
+                        <span class="info-value">Gym will be closed on July 20th for maintenance.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Records Section -->
+            <section id="my-records-section" class="user-card">
+                <h2 class="section-title"><i class="fas fa-history"></i> My Training Records</h2>
+
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchRecords" placeholder="Filter training history...">
+                    <button class="search-btn" id="searchBtn" onclick="searchRecords()"><i class="fas fa-search"></i> Search</button>
+                </div>
+
+                <div class="records-table-container">
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Activity</th>
+                                <th>Duration</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <tr>
+                                <td>2023-07-15</td>
+                                <td>Weight Training</td>
+                                <td>45 mins</td>
+                                <td>Focused on upper body</td>
+                            </tr>
+                            <tr>
+                                <td>2023-07-14</td>
+                                <td>Cardio</td>
+                                <td>30 mins</td>
+                                <td>Treadmill interval training</td>
+                            </tr>
+                            <tr>
+                                <td>2023-07-12</td>
+                                <td>Yoga Class</td>
+                                <td>60 mins</td>
+                                <td>Beginner level</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noRecordsMessage" class="no-records" style="display: none;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i> No records found matching your search.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>GYM Management</span>
+                </div>
+                <p>Stay informed about gym hours, facilities, announcements and your own training records &mdash; all in your personalised user portal.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>My Portal</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Gym Information</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> My Training Records</a></li>
+                    <li><a href="index.html"><i class="fas fa-chevron-right"></i> Logout</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Facilities</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Cardio Zone</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Weight Training</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Studio Classes</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Personal Training</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <div class="footer-contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>123 Fitness Street, Health City, HC 12345</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+1 (123) 456-7890</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>info@gymmanagement.com</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Mon&ndash;Fri: 6 AM &ndash; 10 PM<br>Sat&ndash;Sun: 8 AM &ndash; 8 PM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <span id="currentYear"></span> GYM Management System &mdash; User Portal. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
