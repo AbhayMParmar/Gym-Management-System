@@ -5,7 +5,7 @@ The GYM Management System is a web-based application designed to modernize and s
 
 🔗 Live Project
 
-👉 [Click here to view the Gym-Management-System Live](https://gym-management-system10.netlify.app/) 
+👉 [Click here to view the Gym-Management-System Live](https://cool-centaur-9e400a.netlify.app/) 
 
 
 ✨ Problem Statement
